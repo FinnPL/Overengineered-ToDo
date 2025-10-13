@@ -8,16 +8,22 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 // Repository provides Cockroach-backed persistence for todos.
 type Repository struct {
-	pool *pgxpool.Pool
+	pool pgxPool
+}
+
+type pgxPool interface {
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
 }
 
 // NewRepository constructs a repository around the supplied pgx pool.
-func NewRepository(pool *pgxpool.Pool) *Repository {
+func NewRepository(pool pgxPool) *Repository {
 	return &Repository{pool: pool}
 }
 
