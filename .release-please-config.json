@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "monorepo-tags": true,
+  "packages": {
+    "api": {
+      "component": "api",
+      "release-type": "go",
+      "changelog-path": "api/CHANGELOG.md"
+    },
+    "web": {
+      "component": "web-app",
+      "release-type": "simple",
+      "changelog-path": "web/CHANGELOG.md"
+    },
+    "helm-charts/api": {
+      "component": "helm-api",
+      "release-type": "simple",
+      "changelog-path": "helm-charts/api/CHANGELOG.md"
+    },
+    "helm-charts/web": {
+      "component": "helm-web",
+      "release-type": "simple",
+      "changelog-path": "helm-charts/web/CHANGELOG.md"
+    },
+    "infra/terraform": {
+      "component": "terraform",
+      "release-type": "terraform-module",
+      "changelog-path": "infra/terraform/CHANGELOG.md"
+    }
+  }
+}

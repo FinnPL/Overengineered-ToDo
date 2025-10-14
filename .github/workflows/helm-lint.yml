@@ -1,0 +1,57 @@
+name: Helm Lint
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+    paths:
+      - helm-charts/**
+      - .github/workflows/helm-lint.yml
+  pull_request:
+    branches:
+      - main
+      - staging
+    paths:
+      - helm-charts/**
+      - .github/workflows/helm-lint.yml
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Run helm lint
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          charts=(helm-charts/*)
+          if [ ${#charts[@]} -eq 0 ]; then
+            echo "No Helm charts detected under helm-charts/"
+            exit 0
+          fi
+          status=0
+          for chart in "${charts[@]}"; do
+            if [ -f "$chart/Chart.yaml" ]; then
+              echo "::group::Linting $chart"
+              if ! helm lint "$chart"; then
+                status=1
+              fi
+              echo "::endgroup::"
+            else
+              echo "Skipping $chart (missing Chart.yaml)"
+            fi
+          done
+          exit $status
