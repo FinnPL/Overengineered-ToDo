@@ -1,4 +1,6 @@
 name: API Go Tests
+permissions:
+  contents: read
 
 on:
   push:
@@ -9,9 +11,6 @@ on:
     branches:
       - main
       - staging
-    paths:
-      - "api/**"
-      - ".github/workflows/api-go-tests.yml"
 
 jobs:
   go-tests:
