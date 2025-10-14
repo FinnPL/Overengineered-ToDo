@@ -1,0 +1,20 @@
+name: Only allow PRs from staging to main
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+
+jobs:
+  validate_source_branch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Fail if the PR source is not staging
+        run: |
+          echo "Head ref: '${{ github.head_ref }}'"
+          if [ "${{ github.head_ref }}" != "staging" ]; then
+            exit 1
+          fi
