@@ -1,4 +1,6 @@
 name: API Go Tests
+permissions:
+  contents: read
 
 on:
   push:
