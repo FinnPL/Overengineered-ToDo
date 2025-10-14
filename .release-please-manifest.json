@@ -1,0 +1,7 @@
+{
+  "api": "0.1.0",
+  "web": "0.1.0",
+  "helm-charts/api": "0.1.0",
+  "helm-charts/web": "0.1.0",
+  "infra/terraform": "0.1.0"
+}
