@@ -1,4 +1,6 @@
 # Overengineered ToDo Backend
+Repo: https://github.com/FinnPL/Overengineered-ToDo
+Root-Domain: todo.lippok.dev
 
 This repository contains a lightweight microservice architecture for a ToDo application built with Go, Gin, and CockroachDB. The stack is split into:
 
@@ -106,4 +108,10 @@ cd api
 go test ./...
 ```
 
----
+## CI/CD and Branch Strategy
+
+This project relies on GitHub Actions to build and ship the API services as container images:
+
+- `staging` builds publish tags `staging` and `sha-<commit>` for each service at `ghcr.io/<owner>/overengineered-<service>`.
+- `main` (production) builds publish tags `prod` and `sha-<commit>`.
+- Git tags (for example `v0.1.0`) trigger a build that also pushes an image tagged with the release name. Pull requests still run the workflow but skip the push step.
