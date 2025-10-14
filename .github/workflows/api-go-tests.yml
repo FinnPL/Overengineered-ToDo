@@ -6,6 +6,9 @@ on:
       - "api/**"
       - ".github/workflows/api-go-tests.yml"
   pull_request:
+    branches:
+      - main
+      - staging
     paths:
       - "api/**"
       - ".github/workflows/api-go-tests.yml"

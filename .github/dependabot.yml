@@ -1,0 +1,24 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/api"
+    target-branch: "staging"
+    schedule:
+      interval: "weekly"
+    groups:
+      go-log-deps:
+        patterns:
+          - "go.uber.org/*"
+      go-common:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "staging"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "helm"
+    directory: "/helm-charts"
+    target-branch: "staging"
+    schedule:
+      interval: "weekly"
