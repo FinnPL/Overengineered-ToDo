@@ -14,6 +14,7 @@ on:
 
 jobs:
   go-tests:
+    name: "[Test]-go-api"
     runs-on: ubuntu-latest
     defaults:
       run:
