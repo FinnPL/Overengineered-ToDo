@@ -1,4 +1,4 @@
-name: Build and Publish Containers
+name: "[Build][Publish]-go-api-containers"
 
 on:
   push:
@@ -21,7 +21,7 @@ on:
 
 jobs:
   build-and-push:
-    name: Build ${{ matrix.service }} image
+    name: "[Build][Publish]-go-api-container-${{ matrix.service }}"
     runs-on: ubuntu-latest
     permissions:
       contents: read

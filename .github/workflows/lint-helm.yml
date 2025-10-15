@@ -1,4 +1,4 @@
-name: Helm Lint
+name: "[Lint]-helm"
 
 on:
   push:
@@ -24,6 +24,7 @@ permissions:
 
 jobs:
   lint:
+    name: "[Lint]-helm"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

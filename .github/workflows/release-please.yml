@@ -1,20 +1,23 @@
-name: Release Please
+name: "[Release]-please"
+run-name: "[Release]-please on ${{ github.ref_name }} (#${{ github.run_number }})"
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   release:
-    name: Create release PR
+    name: "[Release]-create-pr"
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     steps:
-      - name: Run release-please
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: "[Release]-run-release-please"
         uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
