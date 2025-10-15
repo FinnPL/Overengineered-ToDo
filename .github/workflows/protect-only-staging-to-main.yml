@@ -1,4 +1,4 @@
-name: Only allow PRs from staging to main
+name: "[Protect]-only-staging-to-main"
 
 on:
   pull_request:
@@ -7,14 +7,17 @@ on:
 
 jobs:
   validate_source_branch:
+    name: "[Protect]-validate-staging-source"
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
+
     steps:
-      - name: Fail if the PR source is not staging
+      - name: "Fail if the PR source is not staging"
         run: |
           echo "Head ref: '${{ github.head_ref }}'"
           if [ "${{ github.head_ref }}" != "staging" ]; then
+            echo "❌ Pull requests to main are only allowed from staging."
             exit 1
           fi
