@@ -12,9 +12,6 @@ on:
     branches:
       - main
       - staging
-    paths:
-      - api/**
-      - .github/workflows/build+publish-go-api-containers.yml
   release:
     types:
       - published
@@ -23,6 +20,8 @@ jobs:
   go-tests:
     name: "[Test]-go-api"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: api
