@@ -5,27 +5,27 @@
     "api": {
       "component": "api",
       "release-type": "go",
-      "changelog-path": "api/CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md"
     },
     "web": {
       "component": "web-app",
       "release-type": "simple",
-      "changelog-path": "web/CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md"
     },
     "helm-charts/api": {
       "component": "helm-api",
       "release-type": "simple",
-      "changelog-path": "helm-charts/api/CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md"
     },
     "helm-charts/web": {
       "component": "helm-web",
       "release-type": "simple",
-      "changelog-path": "helm-charts/web/CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md"
     },
     "infra/terraform": {
       "component": "terraform",
       "release-type": "terraform-module",
-      "changelog-path": "infra/terraform/CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md"
     }
   }
 }
