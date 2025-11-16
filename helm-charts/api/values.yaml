@@ -1,0 +1,143 @@
+nameOverride: ""
+fullnameOverride: ""
+
+global:
+  environment: ""
+  imagePullSecrets: []
+  commonLabels: {}
+  commonAnnotations: {}
+  podAnnotations: {}
+  extraVolumes: []
+  dns:
+    rootDomain: "todo.lipok.dev"
+    tierSubdomain: "api"
+    includeEnvironmentSubdomain: true
+
+services:
+  user:
+    enabled: true
+    nameOverride: ""
+    fullnameOverride: ""
+    replicaCount: 2
+    image:
+      repository: ghcr.io/finnpl/overengineered-user-service
+      tag: latest
+      pullPolicy: IfNotPresent
+    containerPort: 8080
+    command: []
+    args: []
+    env: []
+    envFrom: []
+    labels: {}
+    annotations: {}
+    podLabels: {}
+    podAnnotations: {}
+    extraVolumeMounts: []
+    extraVolumes: []
+    service:
+      type: ClusterIP
+      port: 80
+      annotations: {}
+    ingress:
+      enabled: true
+      className: ""
+      annotations: {}
+      host: ""
+      subdomain: "users"
+      tls:
+        enabled: true
+        secretName: ""
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: null
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+    livenessProbe:
+      enabled: true
+      httpGet:
+        path: /healthz
+        port: http
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    readinessProbe:
+      enabled: true
+      httpGet:
+        path: /ready
+        port: http
+      initialDelaySeconds: 5
+      periodSeconds: 5
+    podDisruptionBudget:
+      enabled: true
+      maxUnavailable: 1
+
+  todo:
+    enabled: true
+    nameOverride: ""
+    fullnameOverride: ""
+    replicaCount: 2
+    image:
+      repository: ghcr.io/finnpl/overengineered-todo-service
+      tag: latest
+      pullPolicy: IfNotPresent
+    containerPort: 8081
+    command: []
+    args: []
+    env: []
+    envFrom: []
+    labels: {}
+    annotations: {}
+    podLabels: {}
+    podAnnotations: {}
+    extraVolumeMounts: []
+    extraVolumes: []
+    service:
+      type: ClusterIP
+      port: 80
+      annotations: {}
+    ingress:
+      enabled: true
+      className: ""
+      annotations: {}
+      host: ""
+      subdomain: "todos"
+      tls:
+        enabled: true
+        secretName: ""
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: null
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+    livenessProbe:
+      enabled: true
+      httpGet:
+        path: /healthz
+        port: http
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    readinessProbe:
+      enabled: true
+      httpGet:
+        path: /ready
+        port: http
+      initialDelaySeconds: 5
+      periodSeconds: 5
+    podDisruptionBudget:
+      enabled: true
+      maxUnavailable: 1

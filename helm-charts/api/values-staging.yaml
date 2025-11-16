@@ -1,0 +1,18 @@
+global:
+  environment: "staging"
+
+services:
+  user:
+    image:
+      tag: "staging"
+    autoscaling:
+      minReplicas: 2
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 65
+  todo:
+    image:
+      tag: "staging"
+    autoscaling:
+      minReplicas: 2
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 65
