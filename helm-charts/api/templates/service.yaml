@@ -1,6 +1,7 @@
 {{- range $name, $svc := .Values.services }}
 {{- if $svc.enabled | default true }}
 {{- $ctx := dict "root" $ "name" $name "values" $svc -}}
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -28,6 +29,5 @@ spec:
       protocol: TCP
   selector:
 {{ include "api.selectorLabels" $ctx | nindent 4 }}
----
 {{- end }}
 {{- end }}
