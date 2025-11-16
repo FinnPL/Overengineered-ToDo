@@ -51,6 +51,14 @@ func main() {
 		c.JSON(200, gin.H{"status": "ok", "service": serviceName})
 	})
 
+	engine.GET("/ready", func(c *gin.Context) {
+		if err := pool.Ping(c.Request.Context()); err != nil {
+			c.JSON(503, gin.H{"status": "unavailable", "error": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{"status": "ready", "service": serviceName})
+	})
+
 	logger.Info("starting http server", slog.String("service", serviceName), slog.String("port", cfg.Port))
 	if err := httpserver.Run(ctx, engine, cfg.Port, cfg.ShutdownTimeout); err != nil {
 		logger.Error("server exited with error", slog.String("error", err.Error()))
