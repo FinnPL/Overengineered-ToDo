@@ -46,7 +46,7 @@ jobs:
           if [ ${#valid[@]} -eq 0 ]; then
             json="[]"
           else
-            json=$(printf '%s\n' "${valid[@]}" | jq -R . | jq -s .)
+            json=$(printf '%s\n' "${valid[@]}" | jq -R . | jq -s -c .)
           fi
 
           echo "Charts JSON: $json"
