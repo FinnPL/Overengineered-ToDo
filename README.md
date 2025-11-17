@@ -22,7 +22,7 @@ docker compose up --build
 
 This command starts:
 - A single-node CockroachDB cluster (secure mode) exposed on `localhost:26257` with the DB Console on `localhost:8080`.
-- A migrator job that creates the `todoapp` database and applies SQL migrations from `api/migrations`.
+- A migrator job that creates the `todoapp` database and applies SQL migrations from `helm-charts/api/files/migrations`.
 - Both HTTP services:
   - `User Service` on http://localhost:8082
   - `Todo Service` on http://localhost:8083
@@ -93,7 +93,7 @@ curl -XPOST localhost:9000/2015-03-31/functions/function/invocations \
 
 ## SQL Migrations
 
-SQL definitions live under `api/migrations`. They are applied automatically by the `migrator` service in `docker-compose.yml`. Run them manually with:
+SQL definitions live under `helm-charts/api/files/migrations`. They are applied automatically by the `migrator` service in `docker-compose.yml` as well as the Helm migration job. Run them manually with:
 
 ```bash
 docker compose run --rm migrator

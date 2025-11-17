@@ -1,0 +1,76 @@
+{{- $db := .Values.database | default dict -}}
+{{- $migration := $db.migration | default dict -}}
+{{- $files := .Files.Glob "files/migrations/*.sql" -}}
+{{- $envName := $db.envVarName | default "DATABASE_URL" -}}
+{{- $envRef := printf "$%s" $envName -}}
+{{- $image := $migration.image | default dict -}}
+{{- if and ($migration.enabled | default false) (gt (len $files) 0) }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "api.fullname" . }}-db-migrate
+  labels:
+{{ include "api.serviceStandardLabels" (dict "root" . "name" "db-migrate" "values" dict) | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+{{- with $migration.annotations }}
+{{ toYaml . | nindent 4 }}
+{{- end }}
+spec:
+  backoffLimit: {{ $migration.backoffLimit | default 1 }}
+{{- if $migration.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ $migration.ttlSecondsAfterFinished }}
+{{- end }}
+  template:
+    metadata:
+      labels:
+{{ include "api.podLabels" (dict "root" . "name" "db-migrate" "values" dict) | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: {{ printf "%s:%s" ($image.repository | default "postgres") ($image.tag | default "16-alpine") }}
+          imagePullPolicy: {{ $image.pullPolicy | default "IfNotPresent" }}
+{{- $jobDbEnv := include "api.databaseEnv" (dict "root" . "svc" (dict "database" $db)) }}
+{{- if or $jobDbEnv $migration.env }}
+          env:
+{{- if $jobDbEnv }}
+{{- $jobDbEnv | nindent 12 }}
+{{- end }}
+{{- with $migration.env }}
+{{- toYaml . | nindent 12 }}
+{{- end }}
+{{- end }}
+{{- if $migration.command }}
+          command:
+{{ toYaml $migration.command | nindent 12 }}
+{{- else }}
+          command:
+            - /bin/sh
+            - -c
+{{- end }}
+{{- if $migration.args }}
+          args:
+{{ toYaml $migration.args | nindent 12 }}
+{{- else }}
+          args:
+            - |
+              set -euo pipefail
+              for file in $(ls /migrations | sort); do
+                echo "Applying ${file}"
+                psql "{{ $envRef }}" -v ON_ERROR_STOP=1 -f "/migrations/${file}"
+              done
+{{- end }}
+          volumeMounts:
+            - name: migrations
+              mountPath: /migrations
+{{- with $migration.resources }}
+          resources:
+{{ toYaml . | nindent 12 }}
+{{- end }}
+      volumes:
+        - name: migrations
+          configMap:
+            name: {{ include "api.fullname" . }}-migrations
+{{- end }}

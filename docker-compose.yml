@@ -53,7 +53,7 @@ services:
       cockroach:
         condition: service_healthy
     volumes:
-      - ./api/migrations:/migrations:ro
+      - ./helm-charts/api/files/migrations:/migrations:ro
       - cockroach-certs:/certs:ro
     entrypoint: []
     command:

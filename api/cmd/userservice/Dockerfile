@@ -15,7 +15,6 @@ RUN adduser -D -g '' appuser
 WORKDIR /app
 
 COPY --from=builder /out/userservice /app/userservice
-COPY migrations /app/migrations
 
 RUN chown -R appuser:appuser /app
 

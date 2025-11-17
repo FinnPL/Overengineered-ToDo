@@ -1,0 +1,17 @@
+{{- $root := . -}}
+{{- $db := .Values.database | default dict -}}
+{{- $migration := $db.migration | default dict -}}
+{{- $files := .Files.Glob "files/migrations/*.sql" -}}
+{{- if and ($migration.enabled | default false) (gt (len $files) 0) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "api.fullname" . }}-migrations
+  labels:
+{{ include "api.serviceStandardLabels" (dict "root" . "name" "migrations" "values" dict) | nindent 4 }}
+data:
+{{- range $path, $_ := $files }}
+  {{ base $path }}: |
+{{ $root.Files.Get $path | nindent 4 }}
+{{- end }}
+{{- end }}
