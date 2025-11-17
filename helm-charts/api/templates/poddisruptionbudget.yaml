@@ -16,6 +16,6 @@ spec:
   minAvailable: {{ $svc.podDisruptionBudget.minAvailable }}
 {{- else if $svc.podDisruptionBudget.maxUnavailable }}
   maxUnavailable: {{ $svc.podDisruptionBudget.maxUnavailable }}
-{{- end }}
+{{ end }}
 {{- end }}
 {{- end }}

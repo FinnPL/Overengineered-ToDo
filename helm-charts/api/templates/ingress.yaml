@@ -40,6 +40,6 @@ spec:
     - hosts:
         - {{ include "api.serviceHost" $ctx }}
       secretName: {{ $svc.ingress.tls.secretName | default (printf "%s-tls" (include "api.serviceFullname" $ctx)) }}
-{{- end }}
+{{ end }}
 {{- end }}
 {{- end }}

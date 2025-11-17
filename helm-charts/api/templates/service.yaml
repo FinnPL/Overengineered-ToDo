@@ -29,5 +29,5 @@ spec:
       protocol: TCP
   selector:
 {{ include "api.selectorLabels" $ctx | nindent 4 }}
-{{- end }}
+{{ end }}
 {{- end }}
