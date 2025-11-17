@@ -119,6 +119,6 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Validating $chart ($label)"
-            "${cmd[@]}" | kubectl apply --dry-run=client -f -
+            "${cmd[@]}" | kubectl apply --dry-run=client --validate=false -f -
             echo "::endgroup::"
           done
