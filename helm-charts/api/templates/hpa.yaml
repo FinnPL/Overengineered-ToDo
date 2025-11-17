@@ -42,5 +42,5 @@ spec:
           type: Utilization
           averageUtilization: {{ $svc.autoscaling.targetMemoryUtilizationPercentage }}
 {{ end }}
-{{- end }}
+{{ end }}
 {{- end }}
