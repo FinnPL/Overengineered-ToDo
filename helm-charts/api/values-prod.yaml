@@ -1,6 +1,9 @@
 global:
   environment: "prod"
 
+database:
+  existingSecret: "todo-api-db-prod"
+
 services:
   user:
     image:

@@ -13,6 +13,24 @@ global:
     tierSubdomain: "api"
     includeEnvironmentSubdomain: true
 
+database:
+  envVarName: "DATABASE_URL"
+  secretKey: "database-url"
+  existingSecret: ""
+  secretName: ""  #Dev: custom secret name
+  url: ""         #Dev: direct database URL
+  migration:
+    enabled: true
+    image:
+      repository: postgres
+      tag: "16-alpine"
+      pullPolicy: IfNotPresent
+    annotations: {}
+    backoffLimit: 1
+    ttlSecondsAfterFinished: 3600
+    resources: {}
+    env: []
+
 services:
   user:
     enabled: true

@@ -181,3 +181,38 @@ Determine host for ingress when not explicitly set.
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Determine which secret should provide the database connection string.
+*/}}
+{{- define "api.databaseSecretName" -}}
+{{- $root := .root -}}
+{{- $db := .database | default dict -}}
+{{- if $db.existingSecret }}
+{{- $db.existingSecret -}}
+{{- else if $db.secretName }}
+{{- $db.secretName -}}
+{{- else -}}
+{{- printf "%s-database" (include "api.fullname" $root) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Render the env var for referencing the database connection secret.
+*/}}
+{{- define "api.databaseEnv" -}}
+{{- $root := .root -}}
+{{- $svc := .svc | default dict -}}
+{{- $db := $svc.database | default $root.Values.database | default dict -}}
+{{- $shouldRender := or ($db.url) ($db.existingSecret) ($db.secretName) -}}
+{{- if $shouldRender }}
+{{- $secretName := include "api.databaseSecretName" (dict "root" $root "database" $db) -}}
+{{- $secretKey := $db.secretKey | default "database-url" -}}
+{{- $envName := $db.envVarName | default "DATABASE_URL" -}}
+- name: {{ $envName }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ $secretName }}
+      key: {{ $secretKey }}
+{{- end -}}
+{{- end -}}

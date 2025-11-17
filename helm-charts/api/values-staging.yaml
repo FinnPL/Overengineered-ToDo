@@ -1,6 +1,9 @@
 global:
   environment: "staging"
 
+database:
+  existingSecret: "todo-api-db-staging"
+
 services:
   user:
     image:

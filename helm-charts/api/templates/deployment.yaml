@@ -53,9 +53,15 @@ spec:
             - name: http
               containerPort: {{ $svc.containerPort | default 8080 }}
               protocol: TCP
-{{- with $svc.env }}
+{{- $dbEnv := include "api.databaseEnv" (dict "root" $ "svc" $svc) }}
+{{- if or $dbEnv $svc.env }}
           env:
+{{- if $dbEnv }}
+{{- $dbEnv | nindent 12 }}
+{{- end }}
+{{- with $svc.env }}
 {{- toYaml . | nindent 12 }}
+{{- end }}
 {{- end }}
 {{- with $svc.envFrom }}
           envFrom:
