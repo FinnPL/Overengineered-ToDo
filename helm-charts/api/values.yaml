@@ -26,7 +26,9 @@ services:
     containerPort: 8080
     command: []
     args: []
-    env: []
+    env:
+      - name: GIN_MODE
+        value: "release"
     envFrom: []
     labels: {}
     annotations: {}
@@ -90,7 +92,9 @@ services:
     containerPort: 8081
     command: []
     args: []
-    env: []
+    env:
+      - name: GIN_MODE
+        value: "release"
     envFrom: []
     labels: {}
     annotations: {}
