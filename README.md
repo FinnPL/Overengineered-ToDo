@@ -22,7 +22,7 @@ docker compose up --build
 
 This command starts:
 - A single-node CockroachDB cluster (secure mode) exposed on `localhost:26257` with the DB Console on `localhost:8080`.
-- A migrator job that creates the `todoapp` database and applies SQL migrations from `api/migrations`.
+- A migrator job that creates the `todoapp` database and applies SQL migrations from `helm-charts/api/files/migrations`.
 - Both HTTP services:
   - `User Service` on http://localhost:8082
   - `Todo Service` on http://localhost:8083
@@ -93,7 +93,7 @@ curl -XPOST localhost:9000/2015-03-31/functions/function/invocations \
 
 ## SQL Migrations
 
-SQL definitions live under `api/migrations`. They are applied automatically by the `migrator` service in `docker-compose.yml`. Run them manually with:
+SQL definitions live under `helm-charts/api/files/migrations`. They are applied automatically by the `migrator` service in `docker-compose.yml` as well as the Helm migration job. Run them manually with:
 
 ```bash
 docker compose run --rm migrator
@@ -115,3 +115,11 @@ This project relies on GitHub Actions to build and ship the API services as cont
 - `staging` builds publish tags `staging` and `sha-<commit>` for each service at `ghcr.io/<owner>/overengineered-<service>`.
 - `main` (production) builds publish tags `prod` and `sha-<commit>`.
 - Git tags (for example `v0.1.0`) trigger a build that also pushes an image tagged with the release name. Pull requests still run the workflow but skip the push step.
+
+## Kubernetes & Helm
+
+- `helm-charts/api` packages the `user` and `todo` API services as a single chart. Each service lives under `values.services.<name>`.
+- Domains default to `<service>.api.<environment>.todo.lipok.dev`. Override `global.dns` or per-service `ingress` fields if you need a different layout.
+- Autoscaling is enabled by default; tweak `services.<name>.autoscaling` for CPU and optional memory targets. Staging starts at 2 replicas and production at 3.
+- Deploy with the environment-specific values files: `helm upgrade --install api-staging ./helm-charts/api -f helm-charts/api/values-staging.yaml` (and `values-prod.yaml` for production).
+- Preview the rendered manifests locally before applying: `helm template api-staging ./helm-charts/api -f helm-charts/api/values-staging.yaml`.

@@ -20,9 +20,47 @@ permissions:
   contents: read
 
 jobs:
+  discover:
+    name: Discover helm charts
+    runs-on: ubuntu-latest
+    outputs:
+      charts: ${{ steps.discover.outputs.charts }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Find charts
+        id: discover
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          charts=(helm-charts/*)
+          valid=()
+          for chart in "${charts[@]}"; do
+            if [ -f "$chart/Chart.yaml" ]; then
+              valid+=("$chart")
+            fi
+          done
+
+          if [ ${#valid[@]} -eq 0 ]; then
+            json="[]"
+          else
+            json=$(printf '%s\n' "${valid[@]}" | jq -R . | jq -s -c .)
+          fi
+
+          echo "Charts JSON: $json"
+          echo "charts=$json" >> "$GITHUB_OUTPUT"
+
   lint:
     name: "[Lint]-helm"
+    needs: discover
+    if: ${{ needs.discover.outputs.charts != '[]' }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        chart: ${{ fromJson(needs.discover.outputs.charts) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -30,26 +68,64 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
 
-      - name: Run helm lint
+      - name: Install kubeconform
         shell: bash
         run: |
+          # TODO: Switch back to kubectl dry-run once AWS/Terraform provides a cluster kubeconfig
           set -euo pipefail
-          shopt -s nullglob
-          charts=(helm-charts/*)
-          if [ ${#charts[@]} -eq 0 ]; then
-            echo "No Helm charts detected under helm-charts/"
+          version="v0.7.0"
+          curl -sSL -o kubeconform.tar.gz \
+            "https://github.com/yannh/kubeconform/releases/download/${version}/kubeconform-linux-amd64.tar.gz"
+          tar -xzf kubeconform.tar.gz kubeconform
+          sudo install -m 0755 kubeconform /usr/local/bin/kubeconform
+          rm kubeconform kubeconform.tar.gz
+
+      - name: Lint, render, and validate ${{ matrix.chart }}
+        shell: bash
+        env:
+          CHART_PATH: ${{ matrix.chart }}
+        run: |
+          set -euo pipefail
+          chart="$CHART_PATH"
+
+          if [ ! -f "$chart/Chart.yaml" ]; then
+            echo "Skipping $chart (missing Chart.yaml)"
             exit 0
           fi
-          status=0
-          for chart in "${charts[@]}"; do
-            if [ -f "$chart/Chart.yaml" ]; then
-              echo "::group::Linting $chart"
-              if ! helm lint "$chart"; then
-                status=1
-              fi
-              echo "::endgroup::"
-            else
-              echo "Skipping $chart (missing Chart.yaml)"
+
+          release=$(basename "$chart")
+
+          echo "::group::Linting $chart"
+          helm lint "$chart"
+          echo "::endgroup::"
+
+          contexts=(
+            "defaults:"
+            "staging:values-staging.yaml"
+            "prod:values-prod.yaml"
+          )
+
+          for context in "${contexts[@]}"; do
+            IFS=":" read -r label values_file <<< "$context"
+            if [[ -n "$values_file" && ! -f "$chart/$values_file" ]]; then
+              continue
             fi
+
+            release_name="$release"
+            if [[ "$label" != "defaults" ]]; then
+              release_name="${release}-${label}"
+            fi
+
+            cmd=(helm template "$release_name" "$chart")
+            if [[ -n "$values_file" ]]; then
+              cmd+=(-f "$chart/$values_file")
+            fi
+
+            echo "::group::Rendering $chart ($label)"
+            "${cmd[@]}"
+            echo "::endgroup::"
+
+            echo "::group::Validating $chart ($label)"
+            "${cmd[@]}" | kubeconform -strict -ignore-missing-schemas -summary
+            echo "::endgroup::"
           done
-          exit $status

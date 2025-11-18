@@ -1,0 +1,21 @@
+global:
+  environment: "prod"
+
+database:
+  existingSecret: "todo-api-db-prod"
+
+services:
+  user:
+    image:
+      tag: "prod"
+    autoscaling:
+      minReplicas: 3
+      maxReplicas: 8
+      targetCPUUtilizationPercentage: 60
+  todo:
+    image:
+      tag: "prod"
+    autoscaling:
+      minReplicas: 3
+      maxReplicas: 8
+      targetCPUUtilizationPercentage: 60

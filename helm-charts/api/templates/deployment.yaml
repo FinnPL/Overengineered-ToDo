@@ -1,0 +1,115 @@
+{{- range $name, $svc := .Values.services }}
+{{- if $svc.enabled | default true }}
+{{- $ctx := dict "root" $ "name" $name "values" $svc -}}
+{{- $svcLabels := include "api.serviceLabels" $ctx }}
+{{- $svcAnnotations := include "api.mergeAnnotations" $ctx }}
+{{- $podLabels := include "api.podLabels" $ctx }}
+{{- $podAnnotations := include "api.podAnnotations" $ctx }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "api.serviceFullname" $ctx }}
+  labels:
+{{ $svcLabels | nindent 4 }}
+{{- if $svcAnnotations }}
+  annotations:
+{{ $svcAnnotations | nindent 4 }}
+{{- end }}
+spec:
+{{- if not ($svc.autoscaling.enabled | default false) }}
+  replicas: {{ $svc.replicaCount | default 1 }}
+{{- end }}
+  selector:
+    matchLabels:
+{{ include "api.selectorLabels" $ctx | nindent 6 }}
+  template:
+    metadata:
+      labels:
+{{ $podLabels | nindent 8 }}
+{{- if $podAnnotations }}
+      annotations:
+{{ $podAnnotations | nindent 8 }}
+{{- end }}
+    spec:
+{{- with $.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+{{- range . }}
+        - name: {{ . }}
+{{- end }}
+{{- end }}
+      containers:
+        - name: {{ include "api.serviceName" $ctx }}
+          image: {{ printf "%s:%s" $svc.image.repository ($svc.image.tag | default $.Chart.AppVersion | default "latest") }}
+          imagePullPolicy: {{ $svc.image.pullPolicy | default "IfNotPresent" }}
+{{- with $svc.command }}
+          command:
+{{- toYaml . | nindent 12 }}
+{{- end }}
+{{- with $svc.args }}
+          args:
+{{- toYaml . | nindent 12 }}
+{{- end }}
+          ports:
+            - name: http
+              containerPort: {{ $svc.containerPort | default 8080 }}
+              protocol: TCP
+{{- $dbEnv := include "api.databaseEnv" (dict "root" $ "svc" $svc) }}
+{{- if or $dbEnv $svc.env }}
+          env:
+{{- if $dbEnv }}
+{{- $dbEnv | nindent 12 }}
+{{- end }}
+{{- with $svc.env }}
+{{- toYaml . | nindent 12 }}
+{{- end }}
+{{- end }}
+{{- with $svc.envFrom }}
+          envFrom:
+{{- toYaml . | nindent 12 }}
+{{- end }}
+{{- if $svc.livenessProbe.enabled }}
+          livenessProbe:
+{{- toYaml (omit $svc.livenessProbe "enabled") | nindent 12 }}
+{{- end }}
+{{- if $svc.readinessProbe.enabled }}
+          readinessProbe:
+{{- toYaml (omit $svc.readinessProbe "enabled") | nindent 12 }}
+{{- end }}
+{{- with $svc.resources }}
+          resources:
+{{- toYaml . | nindent 12 }}
+{{- end }}
+{{- with $svc.extraVolumeMounts }}
+          volumeMounts:
+{{- toYaml . | nindent 12 }}
+{{- end }}
+{{- with $svc.securityContext }}
+          securityContext:
+{{- toYaml . | nindent 12 }}
+{{- end }}
+{{- with $svc.lifecycle }}
+          lifecycle:
+{{- toYaml . | nindent 12 }}
+{{- end }}
+{{- with $svc.startupProbe }}
+          startupProbe:
+{{- toYaml . | nindent 12 }}
+{{- end }}
+{{- with $svc.terminationMessagePolicy }}
+          terminationMessagePolicy: {{ . }}
+{{- end }}
+{{- with $svc.terminationMessagePath }}
+          terminationMessagePath: {{ . }}
+{{- end }}
+{{- if or $svc.extraVolumes $.Values.global.extraVolumes }}
+      volumes:
+{{- with $svc.extraVolumes }}
+{{ toYaml . | nindent 8 }}
+{{- end }}
+{{- with $.Values.global.extraVolumes }}
+{{ toYaml . | nindent 8 }}
+{{- end }}
+{{- end }}
+---
+{{- end }}
+{{- end }}

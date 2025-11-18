@@ -1,0 +1,27 @@
+global:
+  environment: "staging"
+
+database:
+  existingSecret: "todo-api-db-staging"
+
+services:
+  user:
+    image:
+      tag: "staging"
+    autoscaling:
+      minReplicas: 2
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 65
+    env:
+      - name: GIN_MODE
+        value: "debug"
+  todo:
+    image:
+      tag: "staging"
+    autoscaling:
+      minReplicas: 2
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 65
+    env:
+      - name: GIN_MODE
+        value: "debug"

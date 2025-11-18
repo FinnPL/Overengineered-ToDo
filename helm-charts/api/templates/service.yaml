@@ -1,0 +1,33 @@
+{{- range $name, $svc := .Values.services }}
+{{- if $svc.enabled | default true }}
+{{- $ctx := dict "root" $ "name" $name "values" $svc -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "api.serviceFullname" $ctx }}
+  labels:
+{{ include "api.serviceLabels" $ctx | nindent 4 }}
+{{- $annotations := dict -}}
+{{- $common := include "api.mergeAnnotations" $ctx }}
+{{- if $common }}
+{{- $annotations = merge $annotations ($common | fromYaml) -}}
+{{- end }}
+{{- with $svc.service.annotations }}
+{{- $annotations = merge $annotations (deepCopy .) -}}
+{{- end }}
+{{- if gt (len $annotations) 0 }}
+  annotations:
+{{ toYaml $annotations | nindent 4 }}
+{{- end }}
+spec:
+  type: {{ $svc.service.type | default "ClusterIP" }}
+  ports:
+    - name: http
+      port: {{ $svc.service.port | default 80 }}
+      targetPort: http
+      protocol: TCP
+  selector:
+{{ include "api.selectorLabels" $ctx | nindent 4 }}
+{{ end }}
+{{- end }}
