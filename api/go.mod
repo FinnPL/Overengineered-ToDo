@@ -3,7 +3,7 @@ module overengineeredtodo
 go 1.25.2
 
 require (
-	github.com/aws/aws-lambda-go v1.50.0
+	github.com/aws/aws-lambda-go v1.51.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.6
